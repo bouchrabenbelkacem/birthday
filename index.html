@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Le Chemin du Temps</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0f3d2f;
+      --primary-light: #1a5c47;
+      --primary-dark: #082316;
+      --accent: #d4a574;
+      --accent-light: #e8c4a0;
+      --bg-dark: #0a1f1a;
+      --bg-medium: #111f1b;
+      --card-bg: #f5f1ed;
+      --text-light: #e8e4df;
+      --text-muted: #a8a09a;
+      --success: #7cb342;
+      --border: rgba(212, 165, 116, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: linear-gradient(135deg, var(--bg-dark) 0%, var(--primary-dark) 50%, var(--bg-medium) 100%);
+      color: var(--text-light);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background-attachment: fixed;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 50%, rgba(212, 165, 116, 0.03) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(124, 179, 66, 0.02) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 900px;
+      background: linear-gradient(180deg, rgba(15, 61, 47, 0.4) 0%, rgba(8, 35, 22, 0.3) 100%);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 60px 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                  inset 0 1px 0 rgba(212, 165, 116, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      background: linear-gradient(135deg, var(--accent), var(--primary-light));
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--primary-dark);
+      box-shadow: 0 10px 30px rgba(212, 165, 116, 0.2);
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 42px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 12px;
+      letter-spacing: -1px;
+    }
+
+    .lead {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .progress-bar {
+      margin: 40px 0;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--success), var(--accent));
+      border-radius: 20px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 0%;
+    }
+
+    .screens {
+      min-height: 400px;
+    }
+
+    .screens > section {
+      display: none;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .screens > section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* CHOICES SECTION */
+    .choices-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .choice-question {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 20px;
+      line-height: 1.3;
+    }
+
+    .choice-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .choice-btn {
+      flex: 1;
+      min-width: 150px;
+      padding: 16px 24px;
+      background: linear-gradient(135deg, rgba(212, 165, 116, 0.1), rgba(212, 165, 116, 0.05));
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      color: var(--accent);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .choice-btn:hover {
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      color: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(212, 165, 116, 0.3);
+    }
+
+    /* QUIZ SECTION */
+    .quiz-card {
+      background: linear-gradient(135deg, rgba(26, 92, 71, 0.3), rgba(15, 61, 47, 0.2));
+      border: 1px solid var(--border);
+      padding: 36px;
+      border-radius: 16px;
+      backdrop-filter: blur(5px);
+    }
+
+    .question-number {
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+
+    .question-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      color: var(--text-light);
+      font-weight: 700;
+      margin-bottom: 28px;
+      line-height: 1.4;
+    }
+
+    .answer-buttons {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .btn-answer {
+      flex: 1;
+      padding: 14px 24px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn-true {
+      background: rgba(124, 179, 66, 0.15);
+      color: var(--success);
+      border-color: var(--success);
+    }
+
+    .btn-true:hover:not(:disabled) {
+      background: var(--success);
+      color: var(--primary-dark);
+    }
+
+    .btn-false {
+      background: rgba(212, 165, 116, 0.1);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .btn-false:hover:not(:disabled) {
+      background: var(--accent);
+      color: var(--primary-dark);
+    }
+
+    .btn-answer:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* JUSTIFICATION BOX */
+    .justification-box {
+      display: none;
+      background: rgba(212, 165, 116, 0.08);
+      border: 1px solid var(--border);
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      animation: slideDown 0.4s ease-out;
+    }
+
+    .justification-box.visible {
+      display: block;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .justification-label {
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .justification-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 14px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-light);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      resize: vertical;
+      transition: all 0.3s ease;
+    }
+
+    .justification-textarea:focus {
+      outline: none;
+      background: rgba(0, 0, 0, 0.5);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.1);
+    }
+
+    .justification-textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* MESSAGE BOX */
+    .msg-box {
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: rgba(124, 179, 66, 0.1);
+      border-left: 3px solid var(--success);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--success);
+      display: none;
+    }
+
+    .msg-box.visible {
+      display: block;
+    }
+
+    .msg-box.error {
+      background: rgba(212, 165, 116, 0.1);
+      border-left-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* CONTROLS */
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      flex: 1;
+      min-width: 150px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, var(--success), #9ccc65);
+      color: var(--primary-dark);
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(124, 179, 66, 0.3);
+      display: none;
+    }
+
+    .btn-primary.visible {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(124, 179, 66, 0.4);
+    }
+
+    .btn-secondary {
+      flex: 1;
+      min-width: 150px;
+      padding: 14px 28px;
+      background: rgba(212, 165, 116, 0.15);
+      color: var(--accent);
+      border: 2px solid var(--accent);
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: none;
+    }
+
+    .btn-secondary.visible {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--accent);
+      color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    /* FINAL MESSAGE */
+    .final-message {
+      text-align: center;
+      margin-top: 40px;
+      display: none;
+    }
+
+    .final-message.visible {
+      display: block;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .final-message h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .final-message p {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.8;
+      max-width: 600px;
+      margin: 0 auto 30px;
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .modal-content {
+      background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 50px 40px;
+      max-width: 700px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
+      animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-close {
+      float: right;
+      font-size: 28px;
+      color: var(--accent);
+      cursor: pointer;
+      border: none;
+      background: none;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      opacity: 0.7;
+    }
+
+    .letter-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      color: var(--accent);
+      margin: 40px 0 30px;
+      text-align: center;
+    }
+
+    .letter-text {
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--text-light);
+      text-align: justify;
+    }
+
+    .letter-text p {
+      margin-bottom: 20px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 13px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      padding-top: 30px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .app {
+        padding: 40px 24px;
+      }
+
+      h1 {
+        font-size: 32px;
+      }
+
+      .question-text {
+        font-size: 20px;
+      }
+
+      .choice-buttons {
+        flex-direction: column;
+      }
+
+      .choice-btn {
+        width: 100%;
+      }
+
+      .answer-buttons {
+        flex-direction: column;
+      }
+
+      .btn-answer {
+        width: 100%;
+      }
+
+      .modal-content {
+        padding: 40px 24px;
+      }
+
+      .letter-title {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="Le Chemin du Temps - Pack">
+    <header>
+      <div class="logo">CT</div>
+      <h1>Le Chemin du Temps</h1>
+      <p class="lead">Voici une vrai test cette fois ci. Clique, réponds sincèrement, puis découvre la lettre qui t'attend.</p>
+    </header>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="screens">
+      <!-- CHOICES SECTION -->
+      <section id="screen-choices" class="active">
+        <h2 class="choice-question" id="choiceQuestion"></h2>
+
+        <div class="choices-container" id="choiceButtons"></div>
+        <div class="final-message" id="finalMessage"></div>
+      </section>
+
+      <!-- QUIZ SECTION -->
+      <section id="screen-quiz">
+        <h2 class="question-number" id="questionNumber"></h2>
+        <p class="lead" style="margin-bottom: 32px; font-size: 14px;">Réponds par Vrai ou Faux. Si tu choisis Faux ou une réponse libre, explique brièvement.</p>
+
+        <div class="quiz-card">
+          <div class="question-text" id="questionText"></div>
+
+          <div class="answer-buttons" id="answerButtons">
+            <button class="btn-answer btn-true" id="btnTrue">VRAI</button>
+            <button class="btn-answer btn-false" id="btnFalse">FAUX</button>
+          </div>
+
+          <div class="justification-box" id="justifyBox">
+            <label class="justification-label">Pourquoi tu as répondu ainsi :</label>
+            <textarea class="justification-textarea" id="justification" placeholder="Explique ta réponse ici..."></textarea>
+            <div class="controls" style="margin-top: 16px;">
+              <button class="btn-primary visible" id="submitJustify">Valider</button>
+            </div>
+          </div>
+
+          <div class="msg-box" id="quizMsg"></div>
+
+          <div class="controls">
+            <button class="btn-secondary" id="nextQuestion">Question suivante</button>
+            <button class="btn-primary" id="finishQuiz">Terminer et lire la lettre</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- LETTER MODAL -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal-content">
+        <button class="modal-close" id="closeModal">&times;</button>
+        <div class="letter-title">Pour toi</div>
+        <div class="letter-text" id="letterContent"></div>
+      </div>
+    </div>
+
+    <footer>
+      Quand tu auras fini, tu pourras ouvrir la lettre finale.
+    </footer>
+  </div>
+
+  <script>
+    const letterContent = `
+      <p>Je sais que les anniversaires ne sont pas vraiment ton truc, mais aujourd’hui, c’est un jour qui me semble important. Peu importe la façon dont tu le vois, je voulais simplement te rappeler que tu es une personne très chère pour moi. Ta présence compte plus que tu ne l’imagines.</p>
+
+      <p>Depuis que tu as pris cette décision de t’éloigner et d’attendre le bon moment pour faire les choses proprement, pour notre bien, j’ai eu énormément de mal à l’accepter. Aujourd’hui encore, je ne te mens pas en te disant que ce vide ne s’est jamais vraiment comblé. Tu pourrais me dire que cela fait maintenant trois mois et que j’aurais dû m’y habituer… mais non. Je continue de chercher ta présence dans mes journées, de vouloir te raconter chaque détail, d’attendre tes commentaires qui parfois me piquent, mais qui me manquent tellement.</p>
+
+      <p>Je ne sais pas ce que la vie nous réserve dans un an, deux ans ou plus encore. Mais je suis certaine que Dieu ne t’a pas mis sur mon chemin par hasard. Quelle que soit la conclusion de cette histoire, tu auras marqué ma vie d’une manière profonde et exceptionnelle.</p>
+
+      <p>J’ai aimé vivre cette histoire avec tous ses détails, je l’ai vécue avec passion. T’avoir connu a été l’un des tournants les plus importants de ma vie. Je ne regretterai jamais d’avoir rencontré une personne comme toi ni d’avoir partagé ce lien avec toi. Je t’ai choisi pour ce que tu es.</p>
+
+      <p>En toi, j’ai découvert un homme de principes, un homme qui sait ce qu’il veut, confiant, responsable, droit, et surtout un homme qui craint Dieu. C’est pour cela que tu comptes autant pour moi.</p>
+
+      <p>Parfois, je me surprends à penser à l’avenir… et sincèrement, je n’arrive pas à l’imaginer sans que tu y sois présent d’une manière ou d’une autre. Je ne sais pas ce que Dieu a écrit pour nous, et je n’ose pas imaginer un chemin où tu ne ferais plus partie de ma vie.</p>
+
+      <p>Quand je pense à l’avenir, je n’ai qu’une image en tête : toi et moi, loin de tout, à l’autre bout du monde, perdus en pleine nature, en pleine montagne. Peu importe l’endroit, tant que tu es là, près de moi, rien d’autre ne compte.</p>
+
+      <p>J’espère qu’un jour, nous pourrons vivre la vie dont nous rêvions, la partager dans le respect, la complicité et la sérénité. Que tu sauras me comprendre, me respecter et prendre soin de moi, et que je saurai, moi aussi, te rendre cet homme épanoui que tu souhaites devenir.</p>
+
+      <p>Je prie Dieu de te protéger, où que tu sois, de veiller sur toi dans chacun de tes pas. Et même si nous ne sommes pas destinés l’un à l’autre, je continuerai de prier pour qu’Il t’accorde la paix du cœur et qu’Il te bénisse en plaçant sur ton chemin une femme qui Le craint, qui reconnaîtra ta valeur, te respectera et te rendra heureux.</p>
+
+      <p>Je prie pour que tu aimes avec sincérité et que tu sois aimé avec douceur. Même si cela ne m’inclut pas, même si je dois disparaître de ta vie, tu resteras toujours quelqu’un pour qui j’ai invoqué Dieu – et cela, personne ne pourra me l’enlever.</p>
+
+      <p>T’avoir rencontré restera à jamais l’une des plus belles parties de ma vie.</p>
+
+      <p>Pour les années à venir, je te souhaite d’évoluer, de grandir, d’accomplir tout ce que tu désires, de te rapprocher encore plus de Dieu et de devenir chaque jour la meilleure version de toi-même. Que tu réussisses dans ta dunya comme dans ton akhirah, avec équilibre, foi, ambition et paix dans le cœur.</p>
+
+      <p><strong>Joyeux anniversaire. 🤍</strong></p>
+    `;
+
+
+
+    // Injecte la lettre dans la modal (mais ne l’affiche PAS encore)
+document.getElementById('letterContent').innerHTML = letterContent;
+
+// Fonction qui ouvre la modal
+function openLetterModal() {
+  modalOverlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+
+    // CHOICES
+    const steps = [
+      {
+        q: "Combien de femme souhaites tu marier ? :",
+        options: ["1", "bouchra"]
+      },
+      {
+        q: "Si un jour mredt w te7t w mwlitch kima m9bl, est ce que rah tkhmm tzid ttzwdj ? :",
+        options: ["non", "jamais"]
+      },
+      {
+        q: "Est ce que tu penses que je suis la femme ideale lik ? :",
+        options: ["oui", "évidemment"]
+      },
+      {
+        q: "Est ce que we have the choise to call it off doka bch mywlich ter9a3 ? :",
+        options: ["non", "you dont have the choice"]
+      },
+      {
+        q: "Est ce que loukan ndirlk la remarque ela efssa fik qui me derange t9oli ana dyr haka, jamais ? :",
+        options: ["je pourrais jamais dire ca", "ana n9ol haka, jamais"]
+      }
+    ];
+
+    let currentStep = 0;
+    let pathChoices = [];
+    let allResponses = {};
+
+    const choiceQuestion = document.getElementById('choiceQuestion');
+    const choiceButtons = document.getElementById('choiceButtons');
+    const finalMessage = document.getElementById('finalMessage');
+
+    function loadChoiceStep() {
+      finalMessage.classList.remove('visible');
+      if (currentStep >= steps.length) {
+        choiceQuestion.style.display = 'none';
+        choiceButtons.style.display = 'none';
+        finalMessage.innerHTML = `<h2 style="color: var(--accent);">Merci!</h2><p>Tu as complété tous les choix. Clique sur Quiz pour continuer.</p>`;
+        finalMessage.classList.add('visible');
+        return;
+      }
+
+      const step = steps[currentStep];
+      choiceQuestion.textContent = step.q;
+      choiceQuestion.style.display = 'block';
+      choiceButtons.style.display = 'flex';
+      choiceButtons.innerHTML = '';
+
+      step.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.textContent = opt;
+        btn.className = 'choice-btn';
+        btn.addEventListener('click', () => {
+          pathChoices.push(opt);
+          allResponses[`Choix_${currentStep + 1}`] = opt;
+          currentStep++;
+          loadChoiceStep();
+          updateProgress();
+        });
+        choiceButtons.appendChild(btn);
+      });
+    }
+
+    loadChoiceStep();
+
+    // QUIZ
+    const questions = [
+      { q: "Est-ce que je parle trop ?", answer: null },
+      { q: "Est-ce que rah tweli boule7ya ?", answer: null },
+      { q: "Est-ce que on va vivre la vie difficile?", answer: null },
+      { q: "Ou je souhaite acheter le chalet un jour(option algerie indisponible pour le moment) ?", answer: null },
+      { q: "Est-ce que tu cuisineras pour moi un jour ?", answer: null},
+      { q: "Selon toi, qu'est-ce qui me rend spéciale ?", answer: null },
+      { q: "Donne-moi un défaut et une qualité que tu penses que j'ai.", answer: null },
+      { q: "Veux-tu ajouter un truc, n'importe quelle remarque, avis, idée ou pensée ?", answer: null }
+    ];
+
+    let qIndex = 0;
+    const questionNumber = document.getElementById('questionNumber');
+    const questionText = document.getElementById('questionText');
+    const answerButtons = document.getElementById('answerButtons');
+    const btnTrue = document.getElementById('btnTrue');
+    const btnFalse = document.getElementById('btnFalse');
+    const justifyBox = document.getElementById('justifyBox');
+    const justification = document.getElementById('justification');
+    const submitJustify = document.getElementById('submitJustify');
+    const nextQuestion = document.getElementById('nextQuestion');
+    const finishQuiz = document.getElementById('finishQuiz');
+    const quizMsg = document.getElementById('quizMsg');
+    const screens = document.querySelector('.screens');
+    const progressFill = document.getElementById('progressFill');
+
+    function updateProgress() {
+      let totalSteps = steps.length + questions.length;
+      let completedSteps = pathChoices.length + qIndex;
+      let progress = (completedSteps / totalSteps) * 100;
+      progressFill.style.width = progress + '%';
+    }
+
+    function loadQuestion() {
+      const current = questions[qIndex];
+      questionNumber.textContent = `Question ${qIndex + 1}/${questions.length}`;
+      questionText.textContent = current.q;
+      justifyBox.classList.remove('visible');
+      justification.value = '';
+      quizMsg.classList.remove('visible');
+      quizMsg.innerHTML = '';
+      btnTrue.disabled = false;
+      btnFalse.disabled = false;
+      nextQuestion.classList.remove('visible');
+      finishQuiz.classList.remove('visible');
+
+      // Show/hide answer buttons based on question type
+      if (current.answer === null) {
+        answerButtons.style.display = 'none';
+        justifyBox.classList.add('visible');
+        justification.placeholder = 'Écris ta réponse ici...';
+      } else {
+        answerButtons.style.display = 'flex';
+      }
+    }
+
+    function handleAnswer(given) {
+      btnTrue.disabled = true;
+      btnFalse.disabled = true;
+
+      const correct = questions[qIndex].answer;
+      const currentQ = questions[qIndex].q;
+
+      if (correct === null) return;
+
+      if (given === correct) {
+        quizMsg.textContent = given ? 'Bonne réponse — tu comprends.' : 'Bonne réponse.';
+        quizMsg.classList.add('visible');
+        allResponses[`Q${qIndex + 1}`] = `${given ? 'VRAI' : 'FAUX'}`;
+
+        nextQuestion.classList.add('visible');
+        if (qIndex === questions.length - 1) {
+          finishQuiz.classList.add('visible');
+          nextQuestion.classList.remove('visible');
+        }
+      } else {
+        quizMsg.textContent = 'Merci d\'expliquer pourquoi.';
+        quizMsg.classList.add('visible');
+        quizMsg.classList.add('error');
+        justifyBox.classList.add('visible');
+        justification.placeholder = 'Explique ta réponse...';
+      }
+    }
+
+    btnTrue.addEventListener('click', () => handleAnswer(true));
+    btnFalse.addEventListener('click', () => handleAnswer(false));
+
+    submitJustify.addEventListener('click', () => {
+      const txt = justification.value.trim();
+      const currentQ = questions[qIndex];
+
+      if (txt.length < 3) {
+        quizMsg.textContent = 'Une petite justification est nécessaire.';
+        quizMsg.classList.add('visible');
+        quizMsg.classList.add('error');
+        return;
+      }
+
+      // Store the response
+      if (currentQ.answer === null) {
+        allResponses[`Q${qIndex + 1}_Reponse`] = txt;
+      } else {
+        allResponses[`Q${qIndex + 1}_Justification`] = txt;
+      }
+
+      quizMsg.textContent = `"${txt}" — reçu. Merci.`;
+      quizMsg.classList.remove('error');
+      quizMsg.classList.add('visible');
+
+      nextQuestion.classList.add('visible');
+      if (qIndex === questions.length - 1) {
+        finishQuiz.classList.add('visible');
+        nextQuestion.classList.remove('visible');
+      }
+    });
+
+    nextQuestion.addEventListener('click', () => {
+      qIndex++;
+      if (qIndex < questions.length) {
+        loadQuestion();
+        updateProgress();
+      }
+    });
+
+    finishQuiz.addEventListener('click', () => {
+      sendResponsesToEmail();
+      openLetterModal();
+    });
+
+    // MODAL
+    const modalOverlay = document.getElementById('modalOverlay');
+    const closeModal = document.getElementById('closeModal');
+
+    function openLetterModal() {
+      modalOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    closeModal.addEventListener('click', () => {
+      modalOverlay.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    });
+
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) {
+        closeModal.click();
+      }
+    });
+
+    // Navigation
+    const screenChoices = document.getElementById('screen-choices');
+    const screenQuiz = document.getElementById('screen-quiz');
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadQuestion();
+    });
+
+    // Automatically go to quiz after choices
+    const observer = new MutationObserver(() => {
+      if (currentStep >= steps.length && finalMessage.classList.contains('visible')) {
+        setTimeout(() => {
+          screenChoices.classList.remove('active');
+          screenQuiz.classList.add('active');
+          qIndex = 0;
+          loadQuestion();
+        }, 2000);
+      }
+    });
+
+    observer.observe(finalMessage, { attributes: true });
+
+    // Email sending function
+    async function sendResponsesToEmail() {
+      const responsesText = formatResponses();
+
+      try {
+        // Using FormSubmit.co - no setup needed, just send
+        const response = await fetch('https://formsubmit.co/ajax/bouchrbblka@gmail.com', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            subject: 'Réponses de Le Chemin du Temps',
+            message: responsesText,
+            _captcha: 'false',
+            _template: 'table'
+          })
+        });
+
+        if (response.ok) {
+          console.log('Réponses envoyées avec succès');
+        }
+      } catch (error) {
+        console.log('Les réponses ont été enregistrées localement');
+      }
+    }
+
+    function formatResponses() {
+      let text = 'RÉPONSES DE LE CHEMIN DU TEMPS\n\n';
+      text += '=== CHOIX ===\n';
+      steps.forEach((step, index) => {
+        text += `${index + 1}. ${step.q}\n   Réponse: ${allResponses[`Choix_${index + 1}`]}\n\n`;
+      });
+      text += '\n=== QUIZ ===\n';
+      questions.forEach((q, index) => {
+        text += `${index + 1}. ${q.q}\n`;
+        if (allResponses[`Q${index + 1}`]) {
+          text += `   Réponse: ${allResponses[`Q${index + 1}`]}\n`;
+        }
+        if (allResponses[`Q${index + 1}_Justification`]) {
+          text += `   Justification: ${allResponses[`Q${index + 1}_Justification`]}\n`;
+        }
+        if (allResponses[`Q${index + 1}_Reponse`]) {
+          text += `   Réponse: ${allResponses[`Q${index + 1}_Reponse`]}\n`;
+        }
+        text += '\n';
+      });
+      return text;
+    }
+  </script>
+</body>
+</html>
